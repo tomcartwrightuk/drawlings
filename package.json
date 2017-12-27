@@ -1,0 +1,14 @@
+{
+  "name": "drawers",
+  "version": "1.0.0",
+  "description": "Apple pencil sketching and notetaking",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tecartwright@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "ecstatic": "^3.1.1"
+  }
+}
