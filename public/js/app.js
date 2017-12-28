@@ -96,17 +96,46 @@ function multiDraw () {
         console.log('X: ' + point.x + 'Y: ' + point.y)
         if (i === 0) {
           ctx.moveTo(point.x, point.y)
-        } else {
+          return
+        }
+        if (i === 1) {
           const prevPt = data.pts[i - 1]
-          ctx.beginPath()
-          ctx.moveTo(prevPt.x, prevPt.y)
-
           const midPoint = getMidPoint(prevPt, point)
           midpoints.push(midPoint)
+
+          ctx.beginPath()
+          ctx.strokeStyle = color
+          ctx.lineTo(midPoint.x, midPoint.y)
+          ctx.lineWidth = point.width
+          ctx.stroke()
+          return
+        }
+        if (i === data.pts.length - 1) {
+          const p1 = data.pts[i - 2]
+          const p2 = data.pts[i - 1]
+          const m1 = getMidPoint(p1, p2)
+          const m2 = getMidPoint(p2, point)
+          midpoints.push(m2)
+
+          ctx.beginPath()
+          ctx.strokeStyle = color
+          ctx.moveTo(m1.x, m1.y)
+          ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
+          ctx.lineTo(point.x, point.y)
+          ctx.lineWidth = point.width
+          ctx.stroke()
+        } else {
+          const p1 = data.pts[i - 2]
+          const p2 = data.pts[i - 1]
+          const m1 = getMidPoint(p1, p2)
+          const m2 = getMidPoint(p2, point)
+          midpoints.push(m2)
+
+          ctx.beginPath()
+          ctx.moveTo(m1.x, m1.y)
           ctx.strokeStyle = color
           ctx.lineWidth = point.width
-          // ctx.lineTo(point.x, point.y)
-          ctx.quadraticCurveTo(midPoint.x, midPoint.y, point.x, point.y)
+          ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
           ctx.stroke()
         }
       })
@@ -114,6 +143,13 @@ function multiDraw () {
         ctx.beginPath()
         ctx.moveTo(point.x, point.y)
         ctx.fillStyle = 'rgba(255,255,0,0.6)'
+        ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
+        ctx.fill()
+      })
+      data.pts.forEach(function (point, i) {
+        ctx.beginPath()
+        ctx.moveTo(point.x, point.y)
+        ctx.fillStyle = 'rgba(255,124,0,0.6)'
         ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
         ctx.fill()
       })
