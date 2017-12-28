@@ -37,8 +37,9 @@ const hat = () => Math.random()
   .substring(2, 15)
 
 // Store and app state
-let state = {1: {pts: points}}
-let color = 'rgba(15, 68, 153, 0.6)'
+// let state = {1: {pts: points}}
+let state = {}
+let color = 'rgba(15, 68, 153, 1)'
 let currentPathId
 
 // create canvas
@@ -86,8 +87,7 @@ function getMidPoint (p1, p2) {
 function multiDraw () {
   var midpoints = []
   Object.keys(state).forEach(function (id) {
-    // var data = state[id]
-    var data = {pts: points}
+    var data = state[id]
 
     // draw paths
     console.log(data.pts)
@@ -138,20 +138,6 @@ function multiDraw () {
           ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
           ctx.stroke()
         }
-      })
-      midpoints.forEach(function (point, i) {
-        ctx.beginPath()
-        ctx.moveTo(point.x, point.y)
-        ctx.fillStyle = 'rgba(255,255,0,0.6)'
-        ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
-        ctx.fill()
-      })
-      data.pts.forEach(function (point, i) {
-        ctx.beginPath()
-        ctx.moveTo(point.x, point.y)
-        ctx.fillStyle = 'rgba(255,124,0,0.6)'
-        ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
-        ctx.fill()
       })
     }
   })
