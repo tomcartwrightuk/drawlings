@@ -1,22 +1,28 @@
 body {
   margin: 0;
-}
-canvas {
-  border: 1px solid red;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 
-#console-container {
+canvas {
+  border: 1px solid #CCC;
+}
+
+#console {
+  font-family: "Courier", monospace;
   font-size: 10px;
+  color: darkred;
   padding-top: 15px;
   position: fixed;
-  border: 1px solid red;
   bottom: 0;
   left: 0;
   right: 0;
-  background: lightgrey;
+  background: #CCC;
   height: 200px;
-  border-top: 2px blue solid;
+  border-top: 3px solid #595959;
   width: 100%;
   overflow: hidden;
+}
+
+#console-container {
   list-style: none;
 }

@@ -1,26 +1,15 @@
-const points = [
-  {x: 269, y: 377, width: 6},
-  {x: 269.001, y: 377.001, width: 6},
-  {x: 268, y: 376, width: 6},
-  {x: 268, y: 364, width: 6},
-  {x: 273, y: 343, width: 6},
-  {x: 288, y: 314, width: 6},
-  {x: 337, y: 278, width: 6},
-  {x: 412, y: 267, width: 6},
-  {x: 492, y: 279, width: 6},
-  {x: 564, y: 312, width: 6},
-  {x: 601, y: 345, width: 6},
-  {x: 635, y: 388, width: 6}
-]
-
 // Console for ipad dev
+// const consoleEl = document.getElementById('console')
 // const consoleContainer = document.getElementById('console-container')
+// const initialConsoleHeight = consoleEl.clientHeight
 // window.console = {
 //   log: (d) => {
 //     const li = document.createElement('LI')
 //     const text = document.createTextNode('>    ' + d)
 //     li.appendChild(text)
 //     consoleContainer.appendChild(li)
+//     // scroll to the top of the current console list to keep it visisble
+//     consoleContainer.style.marginTop = -(consoleContainer.clientHeight - initialConsoleHeight + 30) + 'px'
 //   },
 //   error: (d) => {
 //     const li = document.createElement('LI')
@@ -29,6 +18,8 @@ const points = [
 //     consoleContainer.appendChild(li)
 //   }
 // }
+
+console.log('And we are go')
 
 const hat = () => Math.random()
   .toString(36)
@@ -39,39 +30,67 @@ const hat = () => Math.random()
 // Store and app state
 // let state = {1: {pts: points}}
 let state = {}
-let color = 'rgba(15, 68, 153, 1)'
+// let color = 'rgba(15, 68, 153, 1)'
+let color = 'rgba(74, 98, 112, 1)'
 let currentPathId
 
 // create canvas
-let canvas = document.createElement('canvas')
-let ctx = canvas.getContext('2d')
-document.body.appendChild(canvas)
+let topCanvas = document.createElement('canvas')
+let topCtx = topCanvas.getContext('2d')
+let bottomCanvas = document.createElement('canvas')
+let btCtx = bottomCanvas.getContext('2d')
+document.body.appendChild(bottomCanvas)
+document.body.appendChild(topCanvas)
 setupCanvas()
 
 function setupCanvas () {
   // calculate scale factor for retina displays
   let devicePixelRatio = window.devicePixelRatio || 1
-  let backingStoreRatio = ctx.webkitBackingStorePixelRatio ||
-    ctx.mozBackingStorePixelRatio ||
-    ctx.msBackingStorePixelRatio ||
-    ctx.oBackingStorePixelRatio ||
-    ctx.backingStorePixelRatio || 1
+  let backingStoreRatio = topCtx.webkitBackingStorePixelRatio ||
+    topCtx.mozBackingStorePixelRatio ||
+    topCtx.msBackingStorePixelRatio ||
+    topCtx.oBackingStorePixelRatio ||
+    topCtx.backingStorePixelRatio || 1
   let ratio = devicePixelRatio / backingStoreRatio
 
   // set canvas width and scale factor
-  canvas.width = window.innerWidth * ratio
-  canvas.height = window.innerHeight * ratio
-  canvas.style.width = window.innerWidth + 'px'
-  canvas.style.height = window.innerHeight + 'px'
-  ctx.scale(ratio, ratio)
+  topCanvas.width = window.innerWidth * ratio
+  topCanvas.height = window.innerHeight * ratio
+  topCanvas.style.width = window.innerWidth + 'px'
+  topCanvas.style.height = window.innerHeight + 'px'
+  topCanvas.style.zIndex = '10'
+  topCanvas.style.position = 'absolute'
+  topCanvas.style.top = '0px'
+  topCanvas.style.left = '0px'
+  topCtx.scale(ratio, ratio)
 
   // set stroke options
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
+  topCtx.lineCap = 'round'
+  topCtx.lineJoin = 'round'
 
   // set font options
-  ctx.fillStyle = 'rgb(255,0,0)'
-  ctx.font = '16px sans-serif'
+  topCtx.fillStyle = 'rgb(255,0,0)'
+  topCtx.font = '16px sans-serif'
+
+  // set canvas width and scale factor
+  bottomCanvas.width = window.innerWidth * ratio
+  bottomCanvas.height = window.innerHeight * ratio
+  bottomCanvas.className = 'bottom'
+  bottomCanvas.style.width = window.innerWidth + 'px'
+  bottomCanvas.style.height = window.innerHeight + 'px'
+  bottomCanvas.style.position = 'absolute'
+  bottomCanvas.style.top = '0px'
+  bottomCanvas.style.left = '0px'
+  bottomCanvas.style.zIndex = '5'
+  btCtx.scale(ratio, ratio)
+
+  // set stroke options
+  btCtx.lineCap = 'round'
+  btCtx.lineJoin = 'round'
+
+  // set font options
+  btCtx.fillStyle = 'rgb(255,0,0)'
+  btCtx.font = '16px sans-serif'
   redraw()
 }
 
@@ -84,120 +103,111 @@ function getMidPoint (p1, p2) {
   }
 }
 
-function multiDraw () {
-  var midpoints = []
-  Object.keys(state).forEach(function (id) {
-    var data = state[id]
+function drawPoints (points, ctx) {
+  let midpoints = []
+  let firstPt = points[0]
+  let secondPt = points[1] || firstPt
+  let thirdPt = points[2] || secondPt
+  let fourthPt = points[3] || thirdPt
 
-    // draw paths
-    console.log(data.pts)
-    if (data.pts) {
-      data.pts.forEach(function (point, i) {
-        console.log('X: ' + point.x + 'Y: ' + point.y)
-        if (i === 0) {
-          ctx.moveTo(point.x, point.y)
-          return
-        }
-        if (i === 1) {
-          const prevPt = data.pts[i - 1]
-          const midPoint = getMidPoint(prevPt, point)
-          midpoints.push(midPoint)
-
-          ctx.beginPath()
-          ctx.strokeStyle = color
-          ctx.lineTo(midPoint.x, midPoint.y)
-          ctx.lineWidth = point.width
-          ctx.stroke()
-          return
-        }
-        if (i === data.pts.length - 1) {
-          const p1 = data.pts[i - 2]
-          const p2 = data.pts[i - 1]
-          const m1 = getMidPoint(p1, p2)
-          const m2 = getMidPoint(p2, point)
-          midpoints.push(m2)
-
-          ctx.beginPath()
-          ctx.strokeStyle = color
-          ctx.moveTo(m1.x, m1.y)
-          ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
-          ctx.lineTo(point.x, point.y)
-          ctx.lineWidth = point.width
-          ctx.stroke()
-        } else {
-          const p1 = data.pts[i - 2]
-          const p2 = data.pts[i - 1]
-          const m1 = getMidPoint(p1, p2)
-          const m2 = getMidPoint(p2, point)
-          midpoints.push(m2)
-
-          ctx.beginPath()
-          ctx.moveTo(m1.x, m1.y)
-          ctx.strokeStyle = color
-          ctx.lineWidth = point.width
-          ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
-          ctx.stroke()
-        }
-      })
+  let prevWidth = parseFloat(firstPt.width)
+  const widthPoints = points.map((p, i, ptArr) => {
+    let ctxWidth
+    const ptWidth = parseFloat(p.width)
+    const topLimit = (prevWidth * 1.05).toFixed(3)
+    const btmLimit = (prevWidth * 0.95).toFixed(3)
+    if (ptWidth > topLimit) {
+      ctxWidth = topLimit
+    } else {
+      if (ptWidth < btmLimit) {
+      // console.log('SMALLER')
+        ctxWidth = btmLimit
+      } else {
+        ctxWidth = ptWidth
+      }
     }
+    prevWidth = ctxWidth
+    return {x: p.x, y: p.y, width: parseFloat(ctxWidth)}
+  })
+  widthPoints.forEach(function (point, i) {
+    ctx.strokeStyle = color
+    if (i === 0) {
+      ctx.moveTo(point.x, point.y)
+      return
+    }
+    if (i === 1) {
+      ctx.lineWidth = point.width
+      const prevPt = points[i - 1]
+      const midPoint = getMidPoint(prevPt, point)
+      midpoints.push(midPoint)
+
+      ctx.beginPath()
+      ctx.lineTo(midPoint.x, midPoint.y)
+      ctx.lineWidth = point.width
+      ctx.stroke()
+      ctx.closePath()
+      return
+    }
+
+    const p1 = points[i - 2] || fourthPt
+    const p2 = points[i - 1]
+    const m1 = getMidPoint(p1, p2)
+    const m2 = getMidPoint(p2, point)
+    midpoints.push(m2)
+    ctx.beginPath()
+    ctx.lineWidth = point.width
+    ctx.moveTo(m1.x, m1.y)
+    ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
+    if (i === points.length - 1) {
+      // final point need line from midpoint to itself
+      ctx.lineTo(point.x, point.y)
+    }
+    ctx.stroke()
+    ctx.closePath()
   })
 }
 
-function redraw () {
-  console.log(window.location.search)
-  // clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
-  // draw the current state
-  if (window.location.search.match(/multi/)) {
-    multiDraw()
-  } else {
-    let midpoints = []
-    Object.keys(state).forEach(function (id) {
-      // var data = state[id]
-      var data = {pts: points}
-      // draw paths
-      ctx.beginPath()
-      if (data.pts) {
-        data.pts.forEach(function (point, i) {
-          console.log('X: ' + point.x + 'Y: ' + point.y)
-          if (i === 0) {
-            ctx.moveTo(point.x, point.y)
-          } else {
-            const prevPt = data.pts[i - 1]
-            const midPoint = getMidPoint(prevPt, point)
-            midpoints.push(midPoint)
-            ctx.strokeStyle = color
-            ctx.lineWidth = point.width
-            ctx.quadraticCurveTo(prevPt.x, prevPt.y, midPoint.x, midPoint.y)
-          }
-        })
-        ctx.stroke()
-        midpoints.forEach(function (point, i) {
-          ctx.beginPath()
-          ctx.moveTo(point.x, point.y)
-          ctx.fillStyle = 'rgba(255,255,0,0.6)'
-          ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
-          ctx.fill()
-        })
-        data.pts.forEach(function (point, i) {
-          ctx.beginPath()
-          ctx.moveTo(point.x, point.y)
-          ctx.fillStyle = 'rgba(255,124,0,0.6)'
-          ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI)
-          ctx.fill()
-        })
-      }
-    })
+function refreshBtmCanvas () {
+  // clear bottom context, render everything and then clear top canvas
+  btCtx.clearRect(0, 0, topCanvas.width, topCanvas.height)
+  Object.keys(state).forEach(function (id) {
+    if (id === currentPathId) {
+      return
+    }
+    var data = state[id]
+    // draw paths
+    if (data.pts) {
+      drawPoints(data.pts, btCtx)
+    }
+  })
+  topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height)
+}
+
+function multiDraw () {
+  var data = state[currentPathId]
+  if (data && data.pts) {
+    drawPoints(data.pts, topCtx)
   }
 }
 
-canvas.addEventListener('mousedown', onDown)
-canvas.addEventListener('touchstart', onDown)
+function redraw () {
+  // clear canvas
+  topCtx.clearRect(0, 0, topCanvas.width, topCanvas.height)
+  // draw the current state
+  multiDraw()
+}
+
+topCanvas.addEventListener('mousedown', onDown)
+topCanvas.addEventListener('touchstart', onDown)
+
+function getLineWidth (e) {
+  return parseFloat((30 * ((e.touches && e.touches[0].force) || 0.4)).toFixed(3))
+}
 
 function onDown (e) {
   e.preventDefault()
   currentPathId = hat()
-  const lineWidth = 30 * ((e.touches && e.touches[0].force) || 0.2)
+  const lineWidth = getLineWidth(e)
   var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
   var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
   var p1 = { x: x, y: y, width: lineWidth }
@@ -211,11 +221,11 @@ function onDown (e) {
   redraw()
 }
 
-canvas.addEventListener('mousemove', onMove)
-canvas.addEventListener('touchmove', onMove)
+topCanvas.addEventListener('mousemove', onMove)
+topCanvas.addEventListener('touchmove', onMove)
 
 function onMove (e) {
-  const lineWidth = 30 * ((e.touches && e.touches[0].force) || 0.2)
+  const lineWidth = getLineWidth(e)
   var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
   var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
   if (currentPathId) {
@@ -229,5 +239,7 @@ document.body.addEventListener('mouseup', onUp)
 document.body.addEventListener('touchend', onUp)
 
 function onUp () {
+  console.log('UP')
   currentPathId = null
+  refreshBtmCanvas()
 }
