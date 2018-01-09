@@ -28,9 +28,7 @@ const hat = () => Math.random()
   .substring(2, 15)
 
 // Store and app state
-// let state = {1: {pts: points}}
 let state = {}
-// let color = 'rgba(15, 68, 153, 1)'
 let color = 'rgba(74, 98, 112, 1)'
 let currentPathId
 
