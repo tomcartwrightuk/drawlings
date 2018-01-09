@@ -8,6 +8,7 @@ canvas {
 }
 
 #console {
+  display: none;
   font-family: "Courier", monospace;
   font-size: 10px;
   color: darkred;

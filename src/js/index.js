@@ -1,24 +1,28 @@
 import '../styles/main.css'
+
 // Console for ipad dev
-// const consoleEl = document.getElementById('console')
-// const consoleContainer = document.getElementById('console-container')
-// const initialConsoleHeight = consoleEl.clientHeight
-// window.console = {
-//   log: (d) => {
-//     const li = document.createElement('LI')
-//     const text = document.createTextNode('>    ' + d)
-//     li.appendChild(text)
-//     consoleContainer.appendChild(li)
-//     // scroll to the top of the current console list to keep it visisble
-//     consoleContainer.style.marginTop = -(consoleContainer.clientHeight - initialConsoleHeight + 30) + 'px'
-//   },
-//   error: (d) => {
-//     const li = document.createElement('LI')
-//     const text = document.createTextNode('>    ' + d)
-//     li.appendChild(text)
-//     consoleContainer.appendChild(li)
-//   }
-// }
+if (window.location.search.match('console')) {
+  const consoleEl = document.getElementById('console')
+  const consoleContainer = document.getElementById('console-container')
+  const initialConsoleHeight = consoleEl.clientHeight
+  consoleEl.style.display = 'block'
+  window.console = {
+    log: (d) => {
+      const li = document.createElement('LI')
+      const text = document.createTextNode('>    ' + d)
+      li.appendChild(text)
+      consoleContainer.appendChild(li)
+      // scroll to the top of the current console list to keep it visisble
+      consoleContainer.style.marginTop = -(consoleContainer.clientHeight - initialConsoleHeight + 30) + 'px'
+    },
+    error: (d) => {
+      const li = document.createElement('LI')
+      const text = document.createTextNode('>    ' + d)
+      li.appendChild(text)
+      consoleContainer.appendChild(li)
+    }
+  }
+}
 
 console.log('And we are go')
 
