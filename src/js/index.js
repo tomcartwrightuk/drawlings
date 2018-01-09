@@ -1,3 +1,4 @@
+import '../styles/main.css'
 // Console for ipad dev
 // const consoleEl = document.getElementById('console')
 // const consoleContainer = document.getElementById('console-container')
