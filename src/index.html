@@ -11,6 +11,29 @@
   </head>
 
   <body>
+
+		<div id="mySidenav" class="sidenav">
+			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+			<a href="#">Drawing 1</a>
+      <div class="add-doc">
+        <a href="#">&#65291</a>
+      </div>
+		</div>
+
+		<div class="side-nav-burger">
+			<span style="font-size:20px;cursor:pointer" onclick="openNav()">&#9776;</span>
+		</div>
+
+		<script>
+		function openNav() {
+				document.getElementById("mySidenav").style.width = "250px";
+		}
+
+		function closeNav() {
+				document.getElementById("mySidenav").style.width = "0";
+		}
+		</script>
+
     <div id='console'>
       <ul id='console-container'></ul>
     </div>

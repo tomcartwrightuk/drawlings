@@ -48,8 +48,9 @@ let topCanvas = document.createElement('canvas')
 let topCtx = topCanvas.getContext('2d')
 let bottomCanvas = document.createElement('canvas')
 let btCtx = bottomCanvas.getContext('2d')
-document.body.appendChild(bottomCanvas)
-document.body.appendChild(topCanvas)
+const mainEl = document.getElementById('main')
+mainEl.appendChild(bottomCanvas)
+mainEl.appendChild(topCanvas)
 setupCanvas()
 
 function setupCanvas () {
@@ -61,16 +62,17 @@ function setupCanvas () {
     topCtx.oBackingStorePixelRatio ||
     topCtx.backingStorePixelRatio || 1
   let ratio = devicePixelRatio / backingStoreRatio
+  const canvasWidth = window.innerWidth - leftOffset
 
   // set canvas width and scale factor
-  topCanvas.width = window.innerWidth * ratio
+  topCanvas.width = (window.innerWidth - leftOffset) * ratio
   topCanvas.height = window.innerHeight * ratio
-  topCanvas.style.width = window.innerWidth + 'px'
+  topCanvas.style.width = canvasWidth + 'px'
   topCanvas.style.height = window.innerHeight + 'px'
   topCanvas.style.zIndex = '10'
   topCanvas.style.position = 'absolute'
+  topCanvas.style.left = leftOffset + 'px'
   topCanvas.style.top = '0px'
-  topCanvas.style.left = '0px'
   topCtx.scale(ratio, ratio)
 
   // set stroke options
@@ -82,14 +84,14 @@ function setupCanvas () {
   topCtx.font = '16px sans-serif'
 
   // set canvas width and scale factor
-  bottomCanvas.width = window.innerWidth * ratio
+  bottomCanvas.width = (window.innerWidth - leftOffset) * ratio
   bottomCanvas.height = window.innerHeight * ratio
   bottomCanvas.className = 'bottom'
-  bottomCanvas.style.width = window.innerWidth + 'px'
+  bottomCanvas.style.width = canvasWidth + 'px'
   bottomCanvas.style.height = window.innerHeight + 'px'
   bottomCanvas.style.position = 'absolute'
+  bottomCanvas.style.left = leftOffset + 'px'
   bottomCanvas.style.top = '0px'
-  bottomCanvas.style.left = '0px'
   bottomCanvas.style.zIndex = '5'
   btCtx.scale(ratio, ratio)
 
@@ -129,7 +131,6 @@ function drawPoints (points, ctx) {
       ctxWidth = topLimit
     } else {
       if (ptWidth < btmLimit) {
-      // console.log('SMALLER')
         ctxWidth = btmLimit
       } else {
         ctxWidth = ptWidth
@@ -219,9 +220,10 @@ function onDown (e) {
   const lineWidth = getLineWidth(e)
   var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
   var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
-  var p1 = { x: x, y: y, width: lineWidth }
+  const offsetX = x - leftOffset
+  var p1 = { x: offsetX, y: y, width: lineWidth }
   var p2 = {
-    x: x + 0.001,
+    x: offsetX + 0.001,
     y: y + 0.001,
     width: lineWidth
   } // paint point on click
@@ -237,8 +239,9 @@ function onMove (e) {
   const lineWidth = getLineWidth(e)
   var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
   var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
+  const offsetX = x - leftOffset
   if (currentPathId) {
-    var pt = { x: x, y: y, width: lineWidth }
+    var pt = { x: offsetX, y: y, width: lineWidth }
     state[currentPathId].pts.push(pt)
     redraw()
   }
@@ -248,7 +251,6 @@ document.body.addEventListener('mouseup', onUp)
 document.body.addEventListener('touchend', onUp)
 
 function onUp () {
-  console.log('UP')
   currentPathId = null
   refreshBtmCanvas()
 }
