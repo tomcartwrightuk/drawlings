@@ -1,4 +1,10 @@
 import '../styles/main.css'
+const leftOffset = 50
+import { h } from 'jsx-dom' // eslint-disable-line
+
+document.body.appendChild(
+  <div id='greeting' className='alert'>Hello World</div>
+)
 
 // Console for ipad dev
 if (window.location.search.match('console')) {
