@@ -1,19 +1,22 @@
 import { h } from 'jsx-dom' // eslint-disable-line
+import store from '../store' // eslint-disable-line
+import { ADD_DOC } from '../action-types'
 
 const nav = () => document.getElementById('side-nav')
 
-function openNav () {
+const openNav = () => (
   nav().style.width = '250px'
-}
+)
 
-function closeNav () {
+const closeNav = () => (
   nav().style.width = '0'
-}
+)
 
-const docLink = (doc) =>
-  (
-    <a href='#'>{doc.title}</a>
-  )
+const docLink = (doc) => (
+  <a href='#'>{doc.title}</a>
+)
+
+const addDoc = () => store.dispatch({ type: ADD_DOC })
 
 export default (documents) => (
   <div>
@@ -21,7 +24,7 @@ export default (documents) => (
       <a href='javascript:void(0)' className='closebtn' onClick={closeNav}>&times;</a>
       {documents.map(doc => docLink(doc))}
       <div className='add-doc'>
-        <a href='#'>&#65291;</a>
+        <a href='#' onClick={addDoc}>&#65291;</a>
       </div>
     </div>
 

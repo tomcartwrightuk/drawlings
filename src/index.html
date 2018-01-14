@@ -15,5 +15,83 @@
       <ul id='console-container'></ul>
     </div>
     <div id="main"></div>
+    <script>
+      if (window.location.search.match('console')) {
+        const consoleEl = document.getElementById('console')
+        const consoleContainer = document.getElementById('console-container')
+        const initialConsoleHeight = consoleEl.clientHeight
+        consoleEl.style.display = 'block'
+        window.console = {
+          log: (d) => {
+            const li = document.createElement('LI')
+            const text = document.createTextNode('>    ' + d)
+            li.appendChild(text)
+            consoleContainer.appendChild(li)
+            // scroll to the top of the current console list to keep it visisble
+            consoleContainer.style.marginTop = -(consoleContainer.clientHeight - initialConsoleHeight + 30) + 'px'
+          },
+          error: (d) => {
+            const li = document.createElement('LI')
+            const text = document.createTextNode('>    ' + d)
+            li.appendChild(text)
+            consoleContainer.appendChild(li)
+          }
+        }
+
+        window.onerror = (msg, url, line) => {
+          const li = document.createElement('LI')
+          const contents = '>    Error at line' + line + 'of ' + url + ' msg: ' + msg
+          const text = document.createTextNode(contents)
+          li.appendChild(text)
+          consoleContainer.appendChild(li)
+          console.log(consoleContainer)
+          // scroll to the top of the current console list to keep it visisble
+          consoleContainer.style.marginTop = -(consoleContainer.clientHeight - initialConsoleHeight + 30) + 'px'
+        }
+      }
+    </script>
+    <style>
+      #console {
+        display: none;
+        font-family: "Courier", monospace;
+        font-size: 10px;
+        color: darkred;
+        padding-top: 15px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #CCC;
+        height: 200px;
+        border-top: 3px solid #595959;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      #console-container {
+        list-style: none;
+      }
+
+      #console {
+        display: none;
+        font-family: "Courier", monospace;
+        font-size: 10px;
+        color: darkred;
+        padding-top: 15px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #CCC;
+        height: 200px;
+        border-top: 3px solid #595959;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      #console-container {
+        list-style: none;
+      }
+    </style>
   </body>
 </body>

@@ -7,27 +7,6 @@ canvas {
   border: 1px solid #CCC;
 }
 
-#console {
-  display: none;
-  font-family: "Courier", monospace;
-  font-size: 10px;
-  color: darkred;
-  padding-top: 15px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #CCC;
-  height: 200px;
-  border-top: 3px solid #595959;
-  width: 100%;
-  overflow: hidden;
-}
-
-#console-container {
-  list-style: none;
-}
-
 .side-nav {
 	height: 100%;
 	width: 0;
