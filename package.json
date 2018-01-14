@@ -8,18 +8,18 @@
   },
   "author": "tecartwright@gmail.com",
   "license": "ISC",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "ecstatic": "^3.1.1"
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-arrow-functions": "^6.22.0",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "css-loader": "^0.28.8",
-    "jsx-dom": "^5.2.0"
+    "ecstatic": "^3.1.1",
     "html-webpack-plugin": "^2.30.1",
+    "jsx-dom": "^5.2.0",
+    "morphdom": "^2.3.3",
     "style-loader": "^0.19.1",
     "webpack": "^3.10.0"
   }

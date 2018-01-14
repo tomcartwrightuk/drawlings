@@ -28,7 +28,7 @@ canvas {
   list-style: none;
 }
 
-.sidenav {
+.side-nav {
 	height: 100%;
 	width: 0;
 	position: fixed;
@@ -41,7 +41,7 @@ canvas {
 	padding-top: 60px;
 }
 
-.sidenav a {
+.side-nav a {
 	padding: 8px 8px 8px 32px;
 	text-decoration: none;
 	font-size: 20px;
@@ -50,11 +50,11 @@ canvas {
 	transition: 0.3s;
 }
 
-.sidenav a:hover {
+.side-nav a:hover {
 	color: #f1f1f1;
 }
 
-.sidenav .closebtn {
+.side-nav .closebtn {
 	position: absolute;
 	top: 0;
 	right: 25px;

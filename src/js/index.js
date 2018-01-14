@@ -1,10 +1,14 @@
 import '../styles/main.css'
-const leftOffset = 50
 import { h } from 'jsx-dom' // eslint-disable-line
+// import * as morphdom from 'morphdom'
+import { render as sidemenu } from './components/side-menu'
 
-document.body.appendChild(
-  <div id='greeting' className='alert'>Hello World</div>
-)
+const container = document.getElementById('main')
+const leftOffset = 50
+const appState = {}
+
+let dom = sidemenu(appState)
+container.appendChild(dom)
 
 // Console for ipad dev
 if (window.location.search.match('console')) {
