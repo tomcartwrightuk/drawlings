@@ -1,13 +1,16 @@
 import '../styles/main.css'
 import { h } from 'jsx-dom' // eslint-disable-line
 // import * as morphdom from 'morphdom'
-import { render as sidemenu } from './components/side-menu'
+import SideMenu from './components/side-menu'
 
 const container = document.getElementById('main')
 const leftOffset = 50
-const appState = {}
+const appState = { documents: [
+  {title: 'Ramble chats'},
+  {title: 'Beep. boop'}
+]}
 
-let dom = sidemenu(appState)
+let dom = SideMenu(appState.documents)
 container.appendChild(dom)
 
 // Console for ipad dev
