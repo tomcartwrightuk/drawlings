@@ -1,11 +1,12 @@
 import { createStore } from 'redux'
-import { ADD_DOC } from './action-types'
+import { ADD_DOC, TOGGLE_NAV } from './action-types'
 
 const initialState = {
   documents: [
     {title: 'Ramble chats'},
     {title: 'Beep. boop'}
-  ]
+  ],
+  navOpen: true
 }
 
 const blankDocument = {
@@ -19,6 +20,11 @@ const reducer = (state = initialState, { payload, type }) => {
       return {
         ...state,
         documents: state.documents.concat([blankDocument])
+      }
+    case TOGGLE_NAV:
+      return {
+        ...state,
+        navOpen: !state.navOpen
       }
     default:
       return state
