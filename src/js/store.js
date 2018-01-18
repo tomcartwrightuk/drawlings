@@ -1,30 +1,53 @@
 import { createStore } from 'redux'
-import { ADD_DOC, TOGGLE_NAV } from './action-types'
+import { ADD_DOC, TOGGLE_NAV, SELECT_DOC } from './action-types'
 
 const initialState = {
   documents: [
-    {title: 'Ramble chats'},
-    {title: 'Beep. boop'}
+    {
+      id: 1,
+      title: 'Ramble chats',
+      elements: [
+        {
+          id: 1,
+          type: 'drawing',
+          content: {
+            paths: []
+          }
+        }
+      ]
+    }
   ],
-  navOpen: true
+  currentDoc: 0,
+  navOpen: true,
+  documentCount: 1
 }
 
-const blankDocument = {
-  title: '< insert title >'
-}
+const getId = state => state.documentCount + 1
+
+const blankDocument = (state) => ({
+  id: getId(state),
+  title: `Doc ${getId(state)}`
+})
 
 const reducer = (state = initialState, { payload, type }) => {
   console.log('Reducer action: ', type)
+  console.log(state)
   switch (type) {
     case ADD_DOC:
       return {
         ...state,
-        documents: state.documents.concat([blankDocument])
+        documents: state.documents.concat([blankDocument(state)]),
+        documentCount: state.documentCount + 1
       }
     case TOGGLE_NAV:
       return {
         ...state,
         navOpen: !state.navOpen
+      }
+    case SELECT_DOC:
+      return {
+        ...state,
+        currentDoc: payload.currentDocIdx
       }
     default:
       return state

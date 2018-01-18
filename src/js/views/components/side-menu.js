@@ -13,7 +13,7 @@ const docLink = (doc) => (
 const addDoc = () => store.dispatch({ type: ADD_DOC })
 
 export default ({ state }) => (
-  <div className={(state.navOpen ? 'show-nav' : '')}>
+  <div id='nav-container' className={(state.navOpen ? 'show-nav' : '')}>
     <div id='side-nav' className='side-nav'>
       <a href='javascript:void(0)' className='close-btn' onClick={toggleNav}>&times;</a>
       {state.documents.map(doc => docLink(doc))}
