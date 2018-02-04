@@ -26,7 +26,16 @@ const getId = state => state.documentCount + 1
 
 const blankDocument = (state) => ({
   id: getId(state),
-  title: `Doc ${getId(state)}`
+  title: `Doc ${getId(state)}`,
+  elements: [
+    {
+      id: 1,
+      type: 'drawing',
+      content: {
+        paths: []
+      }
+    }
+  ]
 })
 
 const reducer = (state = initialState, { payload, type }) => {
@@ -35,7 +44,8 @@ const reducer = (state = initialState, { payload, type }) => {
       return {
         ...state,
         documents: state.documents.concat([blankDocument(state)]),
-        documentCount: state.documentCount + 1
+        documentCount: state.documentCount + 1,
+        currentDoc: state.documentCount
       }
     case TOGGLE_NAV:
       return {

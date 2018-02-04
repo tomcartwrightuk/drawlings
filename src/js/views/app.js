@@ -4,10 +4,10 @@ import * as Canvas from './components/canvas'
 
 export default (state) => {
   const currentElement = state.documents[state.currentDoc].elements[0]
-  const CanvasRender = Canvas.render(currentElement)
+  const CanvasRender = Canvas.render
 
   return (<div className='app'>
     <SideMenu state={state} />
-    <CanvasRender />
+    <CanvasRender element={currentElement} doc={state.documents[state.currentDoc]} />
   </div>)
 }

@@ -1,5 +1,5 @@
 import { h } from 'jsx-dom' // eslint-disable-line
-import store from '../../store'
+// import store from '../../store'
 const color = 'rgba(74, 98, 112, 1)'
 const leftOffset = 50
 const makeId = () => Math.random()
@@ -22,8 +22,13 @@ document.addEventListener('DOMContentLoaded', function (event) {
 
   // create an observer instance
   var observer = new window.MutationObserver(function (mutations) {
+    // TODO remove state from here
+    let hasSetup = false
     mutations.forEach(function (mutation) {
-      console.log(mutation)
+      if (mutation.target.className.match('drawing-container') && !hasSetup) {
+        hasSetup = true
+        setup(mutation.target)
+      }
     })
   })
 
@@ -36,8 +41,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
 // End of canvas listening
 
 const getCanvases = (element) => ({
-  front: document.getElementById(`canvas-front-${element.id}`),
-  back: document.getElementById(`canvas-back-${element.id}`)
+  front: element.getElementsByTagName('canvas')[0],
+  back: element.getElementsByTagName('canvas')[1]
 })
 
 const getContexts = (element, canvases) => ({
@@ -45,17 +50,12 @@ const getContexts = (element, canvases) => ({
   back: canvases.back.getContext('2d')
 })
 
-// Load
-function Canvas ({ element }) {
-  this.element = element
-}
-
-export const render = (element) => {
-  return (<h1>Test html</h1>)
-  // return (<div className='drawing-container' data-element={element.id}>
-  //   <canvas id={`canvas-front-${element.id}`} onmouseup={onUp} ontouchend={onUp} onmousemove={onMove} ontouchmove={onMove} onmousedown={onDown} ontouchstart={onDown} />
-  //   <canvas id={`canvas-back-${element.id}`} />
-  // </div>)
+export const render = ({ doc, element }) => {
+  const el = element
+  return (<div className='drawing-container' data-element={`${doc.id}-${element.id}`}>
+    <canvas id={`canvas-front-${doc.id}-${element.id}`} onmouseup={onUp(doc, el)} ontouchend={onUp(doc, el)} onmousemove={onMove(doc, el)} ontouchmove={onMove(doc, el)} onmousedown={onDown(doc, el)} ontouchstart={onDown(doc, el)} />
+    <canvas id={`canvas-back-${doc.id}-${element.id}`} />
+  </div>)
 }
 
 function setup (element) {
@@ -94,7 +94,7 @@ function setup (element) {
   canvases['front'].style.zIndex = 10
   canvases['back'].style.zIndex = 5
 
-  redraw()
+  // redraw()
 }
 
 const getMidPoint = (p1, p2) => {
@@ -169,73 +169,83 @@ function drawPoints (points, ctx) {
   })
 }
 
-function refreshBtmCanvas () {
+function refreshBtmCanvas (doc, element) {
    // clear bottom context, render everything and then clear top canvas
-  backCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
-  Object.keys(state).forEach(function (id) {
-    if (id === currentPathId) {
-      return
-    }
-    var data = state[id]
-     // draw paths
-    if (data.pts) {
-      drawPoints(data.pts, backCtx)
-    }
-  })
-  frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
-}
-
-function multiDraw () {
-  var data = state[currentPathId]
-  if (data && data.pts) {
-    drawPoints(data.pts, frontCtx)
+  const currentState = state[doc.id][element.id]
+  console.log(state)
+  return function () {
+    backCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
+    Object.keys(currentState).forEach(function (id) {
+      if (id === currentPathId) {
+        return
+      }
+      const data = currentState[id]
+       // draw paths
+      if (data.pts) {
+        drawPoints(data.pts, backCtx)
+      }
+    })
+    frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
   }
 }
 
-function redraw () {
-   // clear canvas
-  frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
-   // draw the current state
-  multiDraw()
+function redraw (doc, element) {
+  return function () {
+     // clear canvas
+    frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
+    // draw the current state
+    var data = state[doc.id][element.id][currentPathId]
+    if (data && data.pts) {
+      drawPoints(data.pts, frontCtx)
+    }
+  }
 }
 
 function getLineWidth (e) {
   return parseFloat((30 * ((e.touches && e.touches[0].force) || 0.4)).toFixed(3))
 }
 
-function onDown (e) {
-  e.preventDefault()
-  currentPathId = makeId()
-  const lineWidth = getLineWidth(e)
-  var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
-  var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
-  const offsetX = x - leftOffset
-  var p1 = { x: offsetX, y: y, width: lineWidth }
-  var p2 = {
-    x: offsetX + 0.001,
-    y: y + 0.001,
-    width: lineWidth
-  } // paint point on click
+function onDown (doc, element) {
+  const draw = redraw(doc, element)
+  return function (e) {
+    e.preventDefault()
+    currentPathId = makeId()
+    const lineWidth = getLineWidth(e)
+    var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
+    var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
+    const offsetX = x - leftOffset
+    var p1 = { x: offsetX, y: y, width: lineWidth }
+    var p2 = {
+      x: offsetX + 0.001,
+      y: y + 0.001,
+      width: lineWidth
+    } // paint point on click
 
-  state[currentPathId] = { color: color, pts: [ p1, p2 ] }
-  redraw()
-}
-
-function onMove (e) {
-  const lineWidth = getLineWidth(e)
-  var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
-  var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
-  const offsetX = x - leftOffset
-  if (currentPathId) {
-    var pt = { x: offsetX, y: y, width: lineWidth }
-    state[currentPathId].pts.push(pt)
-    redraw()
+    state[doc.id] = state[doc.id] || {}
+    state[doc.id][element.id] = state[doc.id][element.id] || {}
+    state[doc.id][element.id][currentPathId] = { color: color, pts: [ p1, p2 ] }
+    draw()
   }
 }
 
-function onUp () {
-  currentPathId = null
-  refreshBtmCanvas()
+function onMove (doc, element) {
+  const draw = redraw(doc, element)
+  return function (e) {
+    const lineWidth = getLineWidth(e)
+    var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
+    var y = e.clientY || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageY) || 0
+    const offsetX = x - leftOffset
+    if (currentPathId) {
+      var pt = { x: offsetX, y: y, width: lineWidth }
+      state[doc.id][element.id][currentPathId].pts.push(pt)
+      draw()
+    }
+  }
 }
 
-export default Canvas
+function onUp (doc, el) {
+  return function () {
+    currentPathId = null
+    refreshBtmCanvas(doc, el)()
+  }
+}
