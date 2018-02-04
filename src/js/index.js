@@ -6,6 +6,11 @@ import store from './store'
 
 console.log('And we are go')
 
+// Pick up errors and alert on mobile
+// window.onerror = (msg, url, line) => {
+//   alert(`${msg} ${url}, Line: ${line}`)
+// }
+
 const container = document.getElementById('main')
 
 // Build the app and append to the container

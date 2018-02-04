@@ -1,4 +1,5 @@
 import { h } from 'jsx-dom' // eslint-disable-line
+import store from '../../store'
 const color = 'rgba(74, 98, 112, 1)'
 const leftOffset = 50
 const makeId = () => Math.random()
@@ -14,11 +15,25 @@ let frontCtx
 let backCtx
 let frontCanvas
 
-// const getContainer = (id) => document.getElementById(`drawing-${id}`)
-//
-const onCanvasLoad = (ev) => {
-  console.log('In a canvas', ev)
-}
+// Listen for canvases being added
+document.addEventListener('DOMContentLoaded', function (event) {
+  // select the target node
+  var target = document.querySelector('#main')
+
+  // create an observer instance
+  var observer = new window.MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      console.log(mutation)
+    })
+  })
+
+  // configuration of the observer:
+  var config = { attributes: true, childList: true, characterData: true, subtree: true }
+
+// pass in the target node, as well as the observer options
+  observer.observe(target, config)
+})
+// End of canvas listening
 
 const getCanvases = (element) => ({
   front: document.getElementById(`canvas-front-${element.id}`),
@@ -30,7 +45,20 @@ const getContexts = (element, canvases) => ({
   back: canvases.back.getContext('2d')
 })
 
-const setup = (element) => {
+// Load
+function Canvas ({ element }) {
+  this.element = element
+}
+
+export const render = (element) => {
+  return (<h1>Test html</h1>)
+  // return (<div className='drawing-container' data-element={element.id}>
+  //   <canvas id={`canvas-front-${element.id}`} onmouseup={onUp} ontouchend={onUp} onmousemove={onMove} ontouchmove={onMove} onmousedown={onDown} ontouchstart={onDown} />
+  //   <canvas id={`canvas-back-${element.id}`} />
+  // </div>)
+}
+
+function setup (element) {
   console.log('Setting up the canvases')
   // calculate scale factor for retina displays
   // TODO: cache these values when device loads
@@ -66,23 +94,10 @@ const setup = (element) => {
   canvases['front'].style.zIndex = 10
   canvases['back'].style.zIndex = 5
 
-  canvases['front'].addEventListener('mousemove', onMove)
-  canvases['front'].addEventListener('touchmove', onMove)
-  canvases['front'].addEventListener('mousedown', onDown)
-  canvases['front'].addEventListener('touchstart', onDown)
   redraw()
 }
 
-// Load
-export default ({ element }) => {
-  return (<div className='drawing-container'>
-    <canvas id={`canvas-front-${element.id}`} onclick={onCanvasLoad} />
-    <canvas id={`canvas-back-${element.id}`} />
-    { setTimeout(function () { setup(element) }, 200) }
-  </div>)
-}
-
-function getMidPoint (p1, p2) {
+const getMidPoint = (p1, p2) => {
   let xDif = p2.x - p1.x
   let yDif = p2.y - p1.y
   return {
@@ -146,7 +161,7 @@ function drawPoints (points, ctx) {
     ctx.moveTo(m1.x, m1.y)
     ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y)
     if (i === points.length - 1) {
-       // final point need line from midpoint to itself
+      // final point need line from midpoint to itself
       ctx.lineTo(point.x, point.y)
     }
     ctx.stroke()
@@ -218,10 +233,9 @@ function onMove (e) {
   }
 }
 
-document.body.addEventListener('mouseup', onUp)
-document.body.addEventListener('touchend', onUp)
-
 function onUp () {
   currentPathId = null
   refreshBtmCanvas()
 }
+
+export default Canvas

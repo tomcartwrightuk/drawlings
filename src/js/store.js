@@ -30,8 +30,6 @@ const blankDocument = (state) => ({
 })
 
 const reducer = (state = initialState, { payload, type }) => {
-  console.log('Reducer action: ', type)
-  console.log(state)
   switch (type) {
     case ADD_DOC:
       return {
