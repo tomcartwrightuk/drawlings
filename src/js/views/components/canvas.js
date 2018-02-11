@@ -15,86 +15,61 @@ let frontCtx
 let backCtx
 let frontCanvas
 
-// Listen for canvases being added
-document.addEventListener('DOMContentLoaded', function (event) {
-  // select the target node
-  var target = document.querySelector('#main')
-
-  // create an observer instance
-  var observer = new window.MutationObserver(function (mutations) {
-    // TODO remove state from here
-    let hasSetup = false
-    mutations.forEach(function (mutation) {
-      if (mutation.target.className.match('drawing-container') && !hasSetup) {
-        hasSetup = true
-        setup(mutation.target)
-      }
-    })
-  })
-
-  // configuration of the observer:
-  var config = { attributes: true, childList: true, characterData: true, subtree: true }
-
-// pass in the target node, as well as the observer options
-  observer.observe(target, config)
-})
-// End of canvas listening
-
-const getCanvases = (element) => ({
-  front: element.getElementsByTagName('canvas')[0],
-  back: element.getElementsByTagName('canvas')[1]
-})
-
-const getContexts = (element, canvases) => ({
-  front: canvases.front.getContext('2d'),
-  back: canvases.back.getContext('2d')
-})
+const addFrontListeners = (el, docId, elId) => {
+  el.addEventListener('mouseup', onUp(docId, elId))
+  el.addEventListener('mousemove', onMove(docId, elId))
+  el.addEventListener('mousedown', onDown(docId, elId))
+  el.addEventListener('touchend', onUp(docId, elId))
+  el.addEventListener('touchmove', onMove(docId, elId))
+  el.addEventListener('touchstart', onDown(docId, elId))
+}
 
 export const render = ({ doc, element }) => {
   const el = element
-  return (<div className='drawing-container' data-element={`${doc.id}-${element.id}`}>
-    <canvas id={`canvas-front-${doc.id}-${element.id}`} onmouseup={onUp(doc, el)} ontouchend={onUp(doc, el)} onmousemove={onMove(doc, el)} ontouchmove={onMove(doc, el)} onmousedown={onDown(doc, el)} ontouchstart={onDown(doc, el)} />
-    <canvas id={`canvas-back-${doc.id}-${element.id}`} />
-  </div>)
-}
+  console.log('Rendering a canvas')
 
-function setup (element) {
-  console.log('Setting up the canvases')
-  // calculate scale factor for retina displays
-  // TODO: cache these values when device loads
-  const canvases = getCanvases(element)
-  const contexts = getContexts(element, canvases)
-  frontCtx = contexts['front']
-  backCtx = contexts['back']
-  frontCanvas = canvases['front']
+  frontCanvas = (<canvas id={`canvas-front-${doc.id}-${el.id}`} />)
+  const back = (<canvas id={`canvas-back-${doc.id}-${element.id}`} />)
+  addFrontListeners(frontCanvas, doc.id, el.id)
+  frontCtx = frontCanvas.getContext('2d')
+  backCtx = back.getContext('2d')
+  frontCanvas.style.zIndex = 10
+  back.style.zIndex = 5
 
   const devicePixelRatio = window.devicePixelRatio || 1
-  const backingStoreRatio = contexts.front.webkitBackingStorePixelRatio ||
-     contexts.front.mozBackingStorePixelRatio ||
-     contexts.front.msBackingStorePixelRatio ||
-     contexts.front.oBackingStorePixelRatio ||
-     contexts.front.backingStorePixelRatio || 1
+  const backingStoreRatio = frontCtx.webkitBackingStorePixelRatio ||
+     frontCtx.mozBackingStorePixelRatio ||
+     frontCtx.msBackingStorePixelRatio ||
+     frontCtx.oBackingStorePixelRatio ||
+     frontCtx.backingStorePixelRatio || 1
   const ratio = devicePixelRatio / backingStoreRatio
   const canvasWidth = window.innerWidth - leftOffset
 
-  Object.keys(canvases).forEach(position => {
-    canvases[position].width = (window.innerWidth - leftOffset) * ratio
-    canvases[position].height = window.innerHeight * ratio
-    canvases[position].style.width = canvasWidth + 'px'
-    canvases[position].style.height = window.innerHeight + 'px'
-    canvases[position].style.position = 'absolute'
-    canvases[position].style.left = leftOffset + 'px'
-    canvases[position].style.front = '0px'
-    contexts[position].scale(ratio, ratio)
-    contexts[position].lineCap = 'round'
-    contexts[position].lineJoin = 'round'
-    contexts[position].fillStyle = 'rgb(255,0,0)'
-    contexts[position].font = '16px sans-serif'
+  const canvases = [frontCanvas, back]
+  canvases.forEach(canvas => {
+    canvas.width = (window.innerWidth - leftOffset) * ratio
+    canvas.height = window.innerHeight * ratio
+    canvas.style.width = canvasWidth + 'px'
+    canvas.style.height = window.innerHeight + 'px'
+    canvas.style.position = 'absolute'
+    canvas.style.left = leftOffset + 'px'
+    canvas.style.front = '0px'
   })
-  canvases['front'].style.zIndex = 10
-  canvases['back'].style.zIndex = 5
-
-  // redraw()
+  const contexts = [frontCtx, backCtx]
+  contexts.forEach(ctx => {
+    ctx.scale(ratio, ratio)
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.fillStyle = 'rgb(255,0,0)'
+    ctx.font = '16px sans-serif'
+  })
+  state[doc.id] = state[doc.id] || {}
+  state[doc.id][element.id] = state[doc.id][element.id] || {}
+  redraw(doc.id, el.id)(true)
+  return (<div className='drawing-container' data-element={`${doc.id}-${element.id}`}>
+    {back}
+    {frontCanvas}
+  </div>)
 }
 
 const getMidPoint = (p1, p2) => {
@@ -117,6 +92,7 @@ function drawPoints (points, ctx) {
   const widthPoints = points.map((p, i, ptArr) => {
     let ctxWidth
     const ptWidth = parseFloat(p.width)
+    // the smoothing algorithm
     const topLimit = (prevWidth * 1.05).toFixed(3)
     const btmLimit = (prevWidth * 0.95).toFixed(3)
     if (ptWidth > topLimit) {
@@ -171,8 +147,7 @@ function drawPoints (points, ctx) {
 
 function refreshBtmCanvas (doc, element) {
    // clear bottom context, render everything and then clear top canvas
-  const currentState = state[doc.id][element.id]
-  console.log(state)
+  const currentState = state[doc][element]
   return function () {
     backCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
     Object.keys(currentState).forEach(function (id) {
@@ -189,12 +164,15 @@ function refreshBtmCanvas (doc, element) {
   }
 }
 
-function redraw (doc, element) {
-  return function () {
+function redraw (docId, elementId) {
+  return function (setup) {
+    if (setup) {
+      // alert('redraw')
+    }
      // clear canvas
     frontCtx.clearRect(0, 0, frontCanvas.width, frontCanvas.height)
     // draw the current state
-    var data = state[doc.id][element.id][currentPathId]
+    var data = state[docId][elementId][currentPathId]
     if (data && data.pts) {
       drawPoints(data.pts, frontCtx)
     }
@@ -205,8 +183,8 @@ function getLineWidth (e) {
   return parseFloat((30 * ((e.touches && e.touches[0].force) || 0.4)).toFixed(3))
 }
 
-function onDown (doc, element) {
-  const draw = redraw(doc, element)
+function onDown (docId, elementId) {
+  const draw = redraw(docId, elementId)
   return function (e) {
     e.preventDefault()
     currentPathId = makeId()
@@ -221,15 +199,13 @@ function onDown (doc, element) {
       width: lineWidth
     } // paint point on click
 
-    state[doc.id] = state[doc.id] || {}
-    state[doc.id][element.id] = state[doc.id][element.id] || {}
-    state[doc.id][element.id][currentPathId] = { color: color, pts: [ p1, p2 ] }
+    state[docId][elementId][currentPathId] = { color: color, pts: [ p1, p2 ] }
     draw()
   }
 }
 
-function onMove (doc, element) {
-  const draw = redraw(doc, element)
+function onMove (docId, elementId) {
+  const draw = redraw(docId, elementId)
   return function (e) {
     const lineWidth = getLineWidth(e)
     var x = e.clientX || (e.changedTouches && e.changedTouches[0] && e.changedTouches[0].pageX) || 0
@@ -237,15 +213,15 @@ function onMove (doc, element) {
     const offsetX = x - leftOffset
     if (currentPathId) {
       var pt = { x: offsetX, y: y, width: lineWidth }
-      state[doc.id][element.id][currentPathId].pts.push(pt)
+      state[docId][elementId][currentPathId].pts.push(pt)
       draw()
     }
   }
 }
 
-function onUp (doc, el) {
+function onUp (docId, elId) {
   return function () {
     currentPathId = null
-    refreshBtmCanvas(doc, el)()
+    refreshBtmCanvas(docId, elId)()
   }
 }
